@@ -24,8 +24,8 @@ all_raw_data <- read.maimages(files = all_raw_data, source = 'agilent', other.co
 ## Filter unwanted probes
 control_probes <- all_raw_data$genes$ControlType==1
 neg_control_probes <- all_raw_data$genes$ControlType==-1
-unexpr_probes <- rowSums(all_raw_data$other$gIsWellAboveBG > 0) >= 4
-data_filt <- all_raw_data[!control_probes & !neg_control_probes,] # if use this then get no diff expr genes?
+unexpr_probes <- rowSums(all_raw_data$other$gIsWellAboveBG > 0) >= 4 # if use this then get no diff expr genes?
+data_filt <- all_raw_data[!control_probes & !neg_control_probes,]
 
 
 ## Normalise within arrays & between arrays
@@ -40,3 +40,8 @@ fit <- eBayes(fit, trend=T, robust = T)
 summary(decideTests(fit[,-1]))
 
 results <- topTable(fit = fit, coef = 4, n = length(as.vector(fit$genes$ProbeUID)))
+
+
+## Gene ontology analysis
+g <- goana(fit, coef=4, species="Rn", geneid = "EntrezID")
+GO_results <- topGO(g, n=20, truncate="50")
